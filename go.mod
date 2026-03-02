@@ -1,4 +1,4 @@
-module telegram-calendar
+module github.com/SomniSom/telegram-calendar
 
 go 1.26
 
