@@ -1,5 +1,4 @@
 package calendar
 
-var t = "Дата и время не могут быть меньше текущего!"
-var t1 = "Трек опубликуется в"
-var t2 = "Действие отменено по таймауту"
+var DateAndTimeCannotLess = "The date and time cannot be less than the current one!"
+var ActionCanceledTimeout = "Action canceled due to timeout"

@@ -18,7 +18,7 @@ type calData struct {
 	removeMessage  bool
 	cancelButton   bool
 	doneTime       bool
-	doneMsg        string
+	doneMsg        func(time.Time) string
 	loc            *time.Location
 	topic          *int
 	Year           int
@@ -189,6 +189,9 @@ func makeKB(cd *calData, pref string) *models.InlineKeyboardMarkup {
 	return kb
 }
 
+// Calendar displays an interactive calendar inline keyboard for date and time selection.
+// It returns a channel that delivers the selected date or an error if cancelled or timed out.
+// pref - prefix for callback identity
 func Calendar(b *bot.Bot, chatID int64, text string, pref string, options ...Option) (chan CalendarOrErr, error) {
 	ch := make(chan CalendarOrErr)
 	cd := new(calData)
@@ -259,7 +262,7 @@ func Calendar(b *bot.Bot, chatID int64, text string, pref string, options ...Opt
 				if time.Since(cd.Time()) > 0 && !cd.acceptBackward {
 					_, _ = b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 						CallbackQueryID: u.CallbackQuery.ID,
-						Text:            t,
+						Text:            DateAndTimeCannotLess,
 						ShowAlert:       true,
 					})
 					return
@@ -314,7 +317,7 @@ func Calendar(b *bot.Bot, chatID int64, text string, pref string, options ...Opt
 					_, err = b.EditMessageText(ctx, &bot.EditMessageTextParams{
 						ChatID:      msg.Chat.ID,
 						MessageID:   msg.ID,
-						Text:        fmt.Sprintf(t1+" %s\n%s", cd.Time().Format("2006-01-02 15:04:05"), cd.doneMsg),
+						Text:        cd.doneMsg(cd.Time()),
 						ReplyMarkup: nil,
 					})
 					if err != nil {
@@ -358,7 +361,7 @@ func Calendar(b *bot.Bot, chatID int64, text string, pref string, options ...Opt
 						MessageID: msg.ID,
 						ReplyMarkup: &models.InlineKeyboardMarkup{
 							InlineKeyboard: [][]models.InlineKeyboardButton{
-								{{Text: t2, CallbackData: "none"}},
+								{{Text: ActionCanceledTimeout, CallbackData: "none"}},
 							},
 						},
 					})
